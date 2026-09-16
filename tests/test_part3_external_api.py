@@ -13,8 +13,17 @@ def test_fetch_user_from_external_api(httpserver: HTTPServer):
     assert user["id"] == 1
     assert user["first"] == "Ada"
     assert user["last"] == "Lovelace"
+    assert client.fetch_user(5) is None
 
 def test_returns_none_on_404(httpserver: HTTPServer):
     httpserver.expect_request("/users/999").respond_with_data(status=404)
     client = UserClient(httpserver.url_for(""))
     assert client.fetch_user(999) is None
+
+def test_returns_none_when_name_fields_are_missing(httpserver: HTTPServer):
+    httpserver.expect_request("/users/5").respond_with_json(
+        {"id": 5, "first": "Ada"}, status=200
+    )
+    client = UserClient(httpserver.url_for(""))
+
+    
